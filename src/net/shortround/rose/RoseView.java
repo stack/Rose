@@ -17,7 +17,7 @@ public class RoseView extends View {
 	public static final int MAX_DECAY = 14;
 	
 	private static final float ROSE_WIDTH = 575.0f;
-	private static final float ROSE_HEIGHT = 525.0f;
+	private static final float ROSE_HEIGHT = 700.0f;
 	
 	private boolean animating;
 	private boolean display;
