@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -15,6 +16,7 @@ public class RoseActivity extends Activity {
 	
 	public static final int MESSAGE_DECAY = 0;
 	public static final int MESSAGE_REVERT = 1;
+	public static final int MESSAGE_TOGGLE_DISPLAY = 2;
 	
 	private BroadcastReceiver batteryReceiver;
 	private RoseView roseView;
@@ -38,6 +40,9 @@ public class RoseActivity extends Activity {
         				break;
         			case MESSAGE_REVERT:
         				roseView.revert();
+        				break;
+        			case MESSAGE_TOGGLE_DISPLAY:
+        				roseView.toggleDisplay();
         				break;
         		}
         	}
@@ -65,5 +70,8 @@ public class RoseActivity extends Activity {
         
         // Show the view
         setContentView(roseView);
+        
+        roseView.setKeepScreenOn(true);
+        roseView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
     }
 }

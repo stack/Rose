@@ -20,6 +20,7 @@ public class RoseView extends View {
 	private static final float ROSE_HEIGHT = 525.0f;
 	
 	private boolean animating;
+	private boolean display;
 	
 	private int battery;
 	private int decay;
@@ -34,6 +35,7 @@ public class RoseView extends View {
 		animating = false;
 		battery = 0;
 		decay = 0;
+		display = true;
 		scale = 1.0f;
 		
 		// Build the roses
@@ -53,9 +55,6 @@ public class RoseView extends View {
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_13));
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_14));
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_15));
-		
-		// Keep the screen on
-		setKeepScreenOn(true);
 	}
 	
 	/*** External Commands ***/
@@ -91,6 +90,17 @@ public class RoseView extends View {
 		invalidate();
 	}
 	
+	public void toggleDisplay() {
+		// Fail if we're animating
+		if (animating) {
+			return;
+		}
+		
+		// Toggle
+		display = display ? false : true;
+		invalidate();
+	}
+	
 	/*** View Callbacks ***/
 	
 	@Override
@@ -106,13 +116,16 @@ public class RoseView extends View {
 		backgroundPaint.setColor(Color.BLACK);
 		canvas.drawPaint(backgroundPaint);
 
-		// Set the proper offset and scale
-		canvas.translate(canvas.getWidth() / 2, canvas.getHeight());
-		canvas.scale(scale, scale);
+		// Only draw if we are displaying
+		if (display) {
+			// Set the proper offset and scale
+			canvas.translate(canvas.getWidth() / 2, canvas.getHeight());
+			canvas.scale(scale, scale);
 				
-		// Draw the appropriate rose
-		Bitmap rose = roses.get(decay);
-		canvas.drawBitmap(rose, rose.getWidth() / -2, rose.getHeight() * -1, null);
+			// Draw the appropriate rose
+			Bitmap rose = roses.get(decay);
+			canvas.drawBitmap(rose, rose.getWidth() / -2, rose.getHeight() * -1, null);
+		}
 				
 		// Restore state
 		canvas.restore();
@@ -148,6 +161,10 @@ public class RoseView extends View {
 	
 	public int getBattery() {
 		return battery;
+	}
+	
+	public boolean getDisplay() {
+		return display;
 	}
 	
 	public int getDecay() {

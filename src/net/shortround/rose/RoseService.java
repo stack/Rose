@@ -22,6 +22,7 @@ public class RoseService extends HttpServlet {
 			int decay = view.getDecay();
 			int maxDecay = RoseView.MAX_DECAY;
 			int battery = view.getBattery();
+			boolean display = view.getDisplay();
 			
 			StringBuilder builder = new StringBuilder();
 			builder.append("{");
@@ -31,6 +32,8 @@ public class RoseService extends HttpServlet {
 			builder.append(maxDecay);
 			builder.append(",\"battery\":");
 			builder.append(battery);
+			builder.append(",\"display\":");
+			builder.append(display ? "true" : "false");
 			builder.append("}");
 			
 			resp.setContentType("application/json");
@@ -43,6 +46,11 @@ public class RoseService extends HttpServlet {
 			resp.setStatus(200);
 		} else if (requestUri.equals("/rose/revert")) {
 			handler.sendMessage(handler.obtainMessage(RoseActivity.MESSAGE_REVERT));
+			
+			resp.setContentType("text/plain");
+			resp.setStatus(200);
+		} else if (requestUri.equals("/rose/toggle")) {
+			handler.sendMessage(handler.obtainMessage(RoseActivity.MESSAGE_TOGGLE_DISPLAY));
 			
 			resp.setContentType("text/plain");
 			resp.setStatus(200);
