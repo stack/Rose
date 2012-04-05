@@ -34,7 +34,7 @@ $(document).ready(function() {
   	});
   });
   
-  $('#decay_button, #revert_button').click(function(event) {
+  $('#decay_button, #revert_button').bind('click', function(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
     event.stopPropagation();

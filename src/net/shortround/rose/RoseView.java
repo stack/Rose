@@ -26,7 +26,8 @@ public class RoseView extends View {
 	private int decay;
 	private float scale;
 	
-	private ArrayList<Bitmap> roses;
+	private Bitmap rose;
+	private ArrayList<Integer> roses;
 	
 	public RoseView(Context context) {
 		super(context);
@@ -39,7 +40,25 @@ public class RoseView extends View {
 		scale = 1.0f;
 		
 		// Build the roses
-		roses = new ArrayList<Bitmap>();
+		roses = new ArrayList<Integer>();
+		roses.add(new Integer(R.drawable.rose_01));
+		roses.add(new Integer(R.drawable.rose_02));
+		roses.add(new Integer(R.drawable.rose_03));
+		roses.add(new Integer(R.drawable.rose_04));
+		roses.add(new Integer(R.drawable.rose_05));
+		roses.add(new Integer(R.drawable.rose_06));
+		roses.add(new Integer(R.drawable.rose_07));
+		roses.add(new Integer(R.drawable.rose_08));
+		roses.add(new Integer(R.drawable.rose_09));
+		roses.add(new Integer(R.drawable.rose_10));
+		roses.add(new Integer(R.drawable.rose_11));
+		roses.add(new Integer(R.drawable.rose_12));
+		roses.add(new Integer(R.drawable.rose_13));
+		roses.add(new Integer(R.drawable.rose_14));
+		roses.add(new Integer(R.drawable.rose_15));
+		
+		rose = null;
+		/*
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_01));
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_02));
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_03));
@@ -55,6 +74,7 @@ public class RoseView extends View {
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_13));
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_14));
 		roses.add(BitmapFactory.decodeResource(getResources(), R.drawable.rose_15));
+		*/
 	}
 	
 	/*** External Commands ***/
@@ -71,6 +91,7 @@ public class RoseView extends View {
 		
 		// Just set the decay
 		decay += 1;
+		rose = null;
 		invalidate();
 	}
 	
@@ -87,6 +108,7 @@ public class RoseView extends View {
 		
 		// Just set the decay
 		decay -= 1;
+		rose = null;
 		invalidate();
 	}
 	
@@ -123,7 +145,7 @@ public class RoseView extends View {
 			canvas.scale(scale, scale);
 				
 			// Draw the appropriate rose
-			Bitmap rose = roses.get(decay);
+			Bitmap rose = getRose();
 			canvas.drawBitmap(rose, rose.getWidth() / -2, rose.getHeight() * -1, null);
 		}
 				
@@ -161,6 +183,15 @@ public class RoseView extends View {
 	
 	public int getBattery() {
 		return battery;
+	}
+	
+	private Bitmap getRose() {
+		if (rose == null) {
+			int resource = roses.get(decay).intValue();
+			rose = BitmapFactory.decodeResource(getResources(), resource);
+		}
+		
+		return rose;
 	}
 	
 	public boolean getDisplay() {
