@@ -245,6 +245,8 @@ public class RoseView extends View {
 			// A touch in the top-left enabled discovery
 			if (event.getX() < 50.0f && event.getY() < 50.0f) {
 				// Become discoverable here
+				RoseActivity activity = (RoseActivity) getContext();
+				activity.ensureDiscoverable();
 				return true;
 			}
 			
