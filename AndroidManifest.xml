@@ -6,6 +6,8 @@
 
     <uses-sdk android:minSdkVersion="15" />
     <uses-permission android:name="android.permission.BATTERY_STATS"/><uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     
 
     <application
@@ -13,7 +15,7 @@
         android:label="@string/app_name" >
         <activity
             android:name=".RoseActivity"
-            android:label="@string/app_name" android:alwaysRetainTaskState="false" android:immersive="true" android:stateNotNeeded="true" android:screenOrientation="portrait" android:noHistory="true" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            android:label="@string/app_name" android:immersive="true" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

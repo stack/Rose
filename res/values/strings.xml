@@ -3,5 +3,7 @@
 
     <string name="hello">Hello World, RoseActivity!</string>
     <string name="app_name">Rose</string>
+    <string name="no_bluetooth">You must have Bluetooth to use this application</string>
+    <string name="bluetooth_enable_fail">Could not enable Bluetooth</string>
 
 </resources>

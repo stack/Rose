@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -25,6 +26,9 @@ public class RoseActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Hide the title
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         
         // Build the view
         roseView = new RoseView(this);
@@ -52,11 +56,16 @@ public class RoseActivity extends Activity {
         batteryReceiver = new BroadcastReceiver() {
         	@Override
         	public void onReceive(Context context, Intent intent) {
-        		int level = intent.getIntExtra("level", 0);
+        		int rawLevel = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        		int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        		
+        		int level = -1;
+        		if (rawLevel  >= 0 && scale > 0) {
+        			level = (rawLevel * 100) / scale;
+        		}
         		roseView.setBattery(level);
         	}
         };
-        this.registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         
         // Spool up the web server
         WebServer server = WebServer.getInstance();
@@ -64,14 +73,33 @@ public class RoseActivity extends Activity {
         server.setHandler(new RoseHandler());
         server.setView(roseView);
         
-        // Go full screen
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        
         // Show the view
         setContentView(roseView);
+    }
+    
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	
+    	// Unregister the battery receiver
+    	unregisterReceiver(batteryReceiver);
+    }
+    
+    @Override 
+    protected void onResume() {
+    	super.onResume();
+    	
+    	// Register the battery receiver
+    	registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    	
+        // Go full screen
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         
+        // Keep the screen on
         roseView.setKeepScreenOn(true);
-        roseView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+        
+        // Hide the soft buttons
+        // roseView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+        roseView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
 }
