@@ -224,7 +224,7 @@ public class RoseActivity extends Activity {
     
     private void sendMessage(String message) {
     	// Check that we have a connection
-    	if (bluetoothService.getState() != BluetoothService.STATE_CONNECTED) {
+    	if (bluetoothService != null && bluetoothService.getState() != BluetoothService.STATE_CONNECTED) {
     		Log.e(TAG, "Send message with no connection");
     		return;
     	}

@@ -39,12 +39,14 @@ public class RoseView extends View {
 	private int decay;
 	private float scale;
 	
+	private Bitmap singlePetal;
+	private Bitmap petal;
+	private Bitmap stem;
+	private ArrayList<Integer> petals;
+	private ArrayList<Integer> stems;
+	
 	private Path path;
 	private PathMeasure pathMeasure;
-	private Bitmap petal;
-	private Bitmap rose;
-	private ArrayList<Integer> roses;
-	
 	private float petalOffset;
 	
 	public RoseView(Context context) {
@@ -57,28 +59,57 @@ public class RoseView extends View {
 		display = true;
 		scale = 1.0f;
 		
-		// Build the roses
-		roses = new ArrayList<Integer>();
-		roses.add(new Integer(R.drawable.rose_01));
-		roses.add(new Integer(R.drawable.rose_02));
-		roses.add(new Integer(R.drawable.rose_03));
-		roses.add(new Integer(R.drawable.rose_04));
-		roses.add(new Integer(R.drawable.rose_05));
-		roses.add(new Integer(R.drawable.rose_06));
-		roses.add(new Integer(R.drawable.rose_07));
-		roses.add(new Integer(R.drawable.rose_08));
-		roses.add(new Integer(R.drawable.rose_09));
-		roses.add(new Integer(R.drawable.rose_10));
-		roses.add(new Integer(R.drawable.rose_11));
-		roses.add(new Integer(R.drawable.rose_12));
-		roses.add(new Integer(R.drawable.rose_13));
-		roses.add(new Integer(R.drawable.rose_14));
-		roses.add(new Integer(R.drawable.rose_15));
+		// Build the petals
+		petals = new ArrayList<Integer>();
+		petals.add(new Integer(R.drawable.petals01));
+		petals.add(new Integer(R.drawable.petals02));
+		petals.add(new Integer(R.drawable.petals03));
+		petals.add(new Integer(R.drawable.petals04));
+		petals.add(new Integer(R.drawable.petals05));
+		petals.add(new Integer(R.drawable.petals06));
+		petals.add(new Integer(R.drawable.petals07));
+		petals.add(new Integer(R.drawable.petals08));
+		petals.add(new Integer(R.drawable.petals09));
+		petals.add(new Integer(R.drawable.petals10));
+		petals.add(new Integer(R.drawable.petals11));
+		petals.add(new Integer(R.drawable.petals12));
+		petals.add(new Integer(R.drawable.petals13));
+		petals.add(new Integer(R.drawable.petals14));
+		petals.add(new Integer(R.drawable.petals15));
 		
+		// Build the petals
+		stems = new ArrayList<Integer>();
+		stems.add(new Integer(R.drawable.stems01));
+		stems.add(new Integer(R.drawable.stems02));
+		stems.add(new Integer(R.drawable.stems03));
+		stems.add(new Integer(R.drawable.stems04));
+		stems.add(new Integer(R.drawable.stems05));
+		stems.add(new Integer(R.drawable.stems06));
+		stems.add(new Integer(R.drawable.stems07));
+		stems.add(new Integer(R.drawable.stems08));
+		stems.add(new Integer(R.drawable.stems09));
+		stems.add(new Integer(R.drawable.stems10));
+		stems.add(new Integer(R.drawable.stems11));
+		stems.add(new Integer(R.drawable.stems12));
+		stems.add(new Integer(R.drawable.stems13));
+		stems.add(new Integer(R.drawable.stems14));
+		stems.add(new Integer(R.drawable.stems15));
+		
+		clearStaticAssets();
+		clearAnimationAssets();
+	}
+	
+	private void clearStaticAssets() {
+		// Clear the bitmaps
+		singlePetal = null;
+		petal = null;
+		stem = null;
+	}
+	
+	private void clearAnimationAssets() {
 		path = null;
 		pathMeasure = null;
 		petalOffset = 0.0f;
-		rose = null;
 	}
 	
 	/*** External Commands ***/
@@ -95,7 +126,7 @@ public class RoseView extends View {
 		
 		// Set the decay
 		decay += 1;
-		rose = null;
+		clearStaticAssets();
 		
 		// Start the animation
 		ValueAnimator animator = ValueAnimator.ofFloat(0.0f, 1.0f);
@@ -106,22 +137,14 @@ public class RoseView extends View {
 			@Override
 			public void onAnimationCancel(Animator animator) {
 				animating = false;
-				
-				path = null;
-				pathMeasure = null;
-				petal = null;
-				
+				clearAnimationAssets();
 				invalidate();
 			}
 
 			@Override
 			public void onAnimationEnd(Animator animation) {
 				animating = false;
-
-				path = null;
-				pathMeasure = null;
-				petal = null;
-				
+				clearAnimationAssets();
 				invalidate();
 			}
 
@@ -159,7 +182,7 @@ public class RoseView extends View {
 		
 		// Just set the decay
 		decay -= 1;
-		rose = null;
+		clearStaticAssets();
 		invalidate();
 	}
 	
@@ -188,17 +211,20 @@ public class RoseView extends View {
 
 		// Only draw if we are displaying
 		if (display) {
-			// If animating, draw the petal
+			// Draw the stem
+			drawStem(canvas);
+			
+			// If animating, draw the single petal
 			if (animating) {
-				drawPetal(canvas);
+				drawSinglePetal(canvas);
 			}
 			
-			// Draw the rose
-			drawRose(canvas);
+			// Draw the petal
+			drawPetal(canvas);
 		}
 	}
 	
-	private void drawPetal(Canvas canvas) {
+	private void drawSinglePetal(Canvas canvas) {
 		canvas.save();
 		
 		// Get the animation path and move to the right path location
@@ -217,13 +243,13 @@ public class RoseView extends View {
 		}
 								
 		// Draw the appropriate rose
-		Bitmap petal = getPetal();
-		canvas.drawBitmap(petal, petal.getWidth() / -2, petal.getHeight() * -1, null);
+		Bitmap singlePetal = getSinglePetal();
+		canvas.drawBitmap(singlePetal, singlePetal.getWidth() / -2, singlePetal.getHeight() * -1, null);
 		
 		canvas.restore();
 	}
 	
-	private void drawRose(Canvas canvas) {
+	private void drawPetal(Canvas canvas) {
 		canvas.save();
 		
 		// Set the proper offset and scale
@@ -231,8 +257,22 @@ public class RoseView extends View {
 		canvas.scale(scale, scale);
 						
 		// Draw the appropriate rose
-		Bitmap rose = getRose();
-		canvas.drawBitmap(rose, rose.getWidth() / -2, rose.getHeight() * -1, null);
+		Bitmap petal = getPetal();
+		canvas.drawBitmap(petal, petal.getWidth() / -2, petal.getHeight() * -1, null);
+		
+		canvas.restore();
+	}
+	
+	private void drawStem(Canvas canvas) {		
+		canvas.save();
+		
+		// Set the proper offset and scale
+		canvas.translate(canvas.getWidth() / 2, canvas.getHeight());
+		canvas.scale(scale, scale);
+						
+		// Draw the appropriate rose
+		Bitmap stem = getStem();
+		canvas.drawBitmap(stem, stem.getWidth() / -2, stem.getHeight() * -1, null);
 		
 		canvas.restore();
 	}
@@ -299,21 +339,30 @@ public class RoseView extends View {
 		return path;
 	}
 	
+	private Bitmap getSinglePetal() {
+		if (singlePetal == null) {
+			singlePetal = BitmapFactory.decodeResource(getResources(), R.drawable.petal);
+		}
+		
+		return singlePetal;
+	}
+	
 	private Bitmap getPetal() {
 		if (petal == null) {
-			petal = BitmapFactory.decodeResource(getResources(), R.drawable.petal);
+			int resource = petals.get(decay).intValue();
+			petal = BitmapFactory.decodeResource(getResources(), resource);
 		}
 		
 		return petal;
 	}
 	
-	private Bitmap getRose() {
-		if (rose == null) {
-			int resource = roses.get(decay).intValue();
-			rose = BitmapFactory.decodeResource(getResources(), resource);
+	private Bitmap getStem() {
+		if (stem == null) {
+			int resource = stems.get(decay).intValue();
+			stem = BitmapFactory.decodeResource(getResources(), resource);
 		}
 		
-		return rose;
+		return stem;
 	}
 	
 	public JSONObject getSerializedData() {
