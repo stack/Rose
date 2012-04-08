@@ -19,26 +19,8 @@ public class RoseService extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String requestUri = req.getRequestURI();
 		if (requestUri.equals("/rose/data")) {
-			int decay = view.getDecay();
-			int maxDecay = RoseView.MAX_DECAY;
-			int battery = view.getBattery();
-			boolean display = view.getDisplay();
-			
-			StringBuilder builder = new StringBuilder();
-			builder.append("{");
-			builder.append("\"decay\":");
-			builder.append(decay);
-			builder.append(",\"max_decay\":");
-			builder.append(maxDecay);
-			builder.append(",\"battery\":");
-			builder.append(battery);
-			builder.append(",\"display\":");
-			builder.append(display ? "true" : "false");
-			builder.append("}");
-			
 			resp.setContentType("application/json");
-			
-			resp.getWriter().println(builder.toString());
+			resp.getWriter().println(view.getSerializedData().toString());
 		} else if (requestUri.equals("/rose/decay")) {
 			handler.sendMessage(handler.obtainMessage(RoseActivity.MESSAGE_DECAY));
 			

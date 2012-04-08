@@ -1,8 +1,5 @@
 package net.shortround.rose;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -44,7 +41,21 @@ public class RoseActivity extends Activity {
 	private BluetoothAdapter bluetoothAdapter = null;
 	private BluetoothService bluetoothService = null;
 	
-    /** Called when the activity is first created. */
+    /*** Lifecycle Callbacks ***/
+	
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	switch (requestCode) {
+    	case REQUEST_ENABLE_BT:
+    		if (resultCode == Activity.RESULT_OK) {
+    			setupBluetoothService();
+    		} else {
+    			Log.e(TAG, "Bluetooth not enabled");
+    			finish();
+    		}
+    		break;
+    	}
+    }
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,24 +77,6 @@ public class RoseActivity extends Activity {
         roseView = new RoseView(this);
         roseView.setFocusable(true);
         
-        // Build the message handler
-        class RoseHandler extends Handler {
-        	@Override
-        	public void handleMessage(Message msg) {
-        		switch (msg.what) {
-        			case MESSAGE_DECAY:
-        				roseView.decay();
-        				break;
-        			case MESSAGE_REVERT:
-        				roseView.revert();
-        				break;
-        			case MESSAGE_TOGGLE_DISPLAY:
-        				roseView.toggleDisplay();
-        				break;
-        		}
-        	}
-        }
-        
         // Build the battery receiver
         batteryReceiver = new BroadcastReceiver() {
         	@Override
@@ -102,24 +95,11 @@ public class RoseActivity extends Activity {
         // Spool up the web server
         WebServer server = WebServer.getInstance();
         server.setAssetManager(this.getAssets());
-        server.setHandler(new RoseHandler());
+        server.setHandler(webHandler);
         server.setView(roseView);
         
         // Show the view
         setContentView(roseView);
-    }
-    
-    @Override
-    public void onStart() {
-    	super.onStart();
-    	
-    	// Request bluetooth 
-    	if (bluetoothAdapter.isEnabled()) {
-    		Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-    		startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-    	} else {
-    		if (bluetoothService == null) setupBluetoothService();
-    	}
     }
     
     @Override
@@ -155,31 +135,20 @@ public class RoseActivity extends Activity {
     	}
     }
     
-    private void setupBluetoothService() {
-    	// Initialize the bluetooth service
-    	bluetoothService = new BluetoothService(this, bluetoothHandler);
+    @Override
+    public void onStart() {
+    	super.onStart();
     	
-    	// Build the outgoing buffer
-    	outputStringBuffer = new StringBuffer("");
+    	// Request bluetooth 
+    	if (bluetoothAdapter.isEnabled()) {
+    		Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+    		startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+    	} else {
+    		if (bluetoothService == null) setupBluetoothService();
+    	}
     }
     
-    private void sendMessage(String message) {
-    	// Check that we have a connection
-    	if (bluetoothService.getState() != BluetoothService.STATE_CONNECTED) {
-    		Log.e(TAG, "Send message with no connection");
-    		return;
-    	}
-    	
-    	// Check that there's something to send
-    	if (message.length() > 0) {
-    		// Get the message as bytes
-    		byte[] send = message.getBytes();
-    		bluetoothService.write(send);
-    		
-    		// Clean up
-    		outputStringBuffer.setLength(0);
-    	}
-    }
+    /*** Bluetooth Methods ***/
     
     private final Handler bluetoothHandler = new Handler() {
     	@Override
@@ -211,6 +180,13 @@ public class RoseActivity extends Activity {
     	}
     };
     
+    public void ensureDiscoverable() {
+        if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+        }
+    }
     
     private void parseMessage(String message) {
     	if (message.equals("decay")) {
@@ -221,42 +197,52 @@ public class RoseActivity extends Activity {
     		roseView.toggleDisplay();
     	}
     	
-    	sendData();
+    	// A sent message always returns the current data of the view
+    	sendMessage(roseView.getSerializedData().toString());
     }
     
-    private void sendData() {
-    	JSONObject json = new JSONObject();
+    private void sendMessage(String message) {
+    	// Check that we have a connection
+    	if (bluetoothService.getState() != BluetoothService.STATE_CONNECTED) {
+    		Log.e(TAG, "Send message with no connection");
+    		return;
+    	}
     	
-    	try {
-    		json.put("decay", roseView.getDecay());
-    		json.put("max_decay", RoseView.MAX_DECAY);
-    		json.put("battery", roseView.getBattery());
-    		json.put("display", roseView.getDisplay());
-    	
-    		sendMessage(json.toString());
-    	} catch (JSONException e) {
-    		Log.d(TAG, "JSON creation failed", e);
+    	// Check that there's something to send
+    	if (message.length() > 0) {
+    		// Get the message as bytes
+    		byte[] send = message.getBytes();
+    		bluetoothService.write(send);
+    		
+    		// Clean up
+    		outputStringBuffer.setLength(0);
     	}
     }
     
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	switch (requestCode) {
-    	case REQUEST_ENABLE_BT:
-    		if (resultCode == Activity.RESULT_OK) {
-    			setupBluetoothService();
-    		} else {
-    			Log.e(TAG, "Bluetooth not enabled");
-    			finish();
+    private void setupBluetoothService() {
+    	// Initialize the bluetooth service
+    	bluetoothService = new BluetoothService(this, bluetoothHandler);
+    	
+    	// Build the outgoing buffer
+    	outputStringBuffer = new StringBuffer("");
+    }
+    
+    /*** Web Methods ***/
+    
+    private final Handler webHandler = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		switch (msg.what) {
+    			case MESSAGE_DECAY:
+    				roseView.decay();
+    				break;
+    			case MESSAGE_REVERT:
+    				roseView.revert();
+    				break;
+    			case MESSAGE_TOGGLE_DISPLAY:
+    				roseView.toggleDisplay();
+    				break;
     		}
-    		break;
     	}
-    }
-    
-    public void ensureDiscoverable() {
-        if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
-    }
+    };
 }

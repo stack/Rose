@@ -2,6 +2,9 @@ package net.shortround.rose;
 
 import java.util.ArrayList;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
@@ -14,11 +17,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 public class RoseView extends View {
+	// Debug
+	private static final String TAG = "RoseView";
 
 	public static final int MIN_DECAY = 0;
 	public static final int MAX_DECAY = 14;
@@ -304,6 +310,21 @@ public class RoseView extends View {
 		}
 		
 		return rose;
+	}
+	
+	public JSONObject getSerializedData() {
+		JSONObject json = new JSONObject();
+    	
+    	try {
+    		json.put("decay", getDecay());
+    		json.put("max_decay", RoseView.MAX_DECAY);
+    		json.put("battery", getBattery());
+    		json.put("display", getDisplay());
+    	} catch (JSONException e) {
+    		Log.d(TAG, "JSON creation failed", e);
+    	}
+    	
+    	return json;
 	}
 	
 	public void setBattery(int value) {
