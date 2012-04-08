@@ -148,6 +148,28 @@ public class RoseActivity extends Activity {
     	}
     }
     
+    /*** Actions ***/
+    private void decay() {
+    	roseView.decay();
+    	
+    	// Send a bluetooth message with the current data
+    	sendMessage(roseView.getSerializedData().toString());
+    }
+    
+    private void revert() {
+    	roseView.revert();
+    	
+    	// Send a bluetooth message with the current data
+    	sendMessage(roseView.getSerializedData().toString());
+    }
+    
+    private void toggleDisplay() {
+    	roseView.toggleDisplay();
+    	
+    	// Send a bluetooth message with the current data
+    	sendMessage(roseView.getSerializedData().toString());
+    }
+    
     /*** Bluetooth Methods ***/
     
     private final Handler bluetoothHandler = new Handler() {
@@ -190,15 +212,14 @@ public class RoseActivity extends Activity {
     
     private void parseMessage(String message) {
     	if (message.equals("decay")) {
-    		roseView.decay();
+    		decay();
     	} else if (message.equals("revert")) {
-    		roseView.revert();
+    		revert();
     	} else if (message.equals("display")) {
-    		roseView.toggleDisplay();
+    		toggleDisplay();
+    	} else if (message.equals("data")) {
+    		sendMessage(roseView.getSerializedData().toString());
     	}
-    	
-    	// A sent message always returns the current data of the view
-    	sendMessage(roseView.getSerializedData().toString());
     }
     
     private void sendMessage(String message) {
@@ -234,13 +255,13 @@ public class RoseActivity extends Activity {
     	public void handleMessage(Message msg) {
     		switch (msg.what) {
     			case MESSAGE_DECAY:
-    				roseView.decay();
+    				decay();
     				break;
     			case MESSAGE_REVERT:
-    				roseView.revert();
+    				revert();
     				break;
     			case MESSAGE_TOGGLE_DISPLAY:
-    				roseView.toggleDisplay();
+    				toggleDisplay();
     				break;
     		}
     	}
