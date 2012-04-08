@@ -21,11 +21,6 @@ public class RoseActivity extends Activity {
 		
 	// Intent request codes
 	private static final int REQUEST_ENABLE_BT = 1;
-		
-	// Messages sent from the Web Service
-	public static final int MESSAGE_DECAY = 0;
-	public static final int MESSAGE_REVERT = 1;
-	public static final int MESSAGE_TOGGLE_DISPLAY = 2;
 	
 	// Messages sent from the Bluetooth Service
 	public static final int MESSAGE_FAILURE = 3;
@@ -91,12 +86,6 @@ public class RoseActivity extends Activity {
         		roseView.setBattery(level);
         	}
         };
-        
-        // Spool up the web server
-        WebServer server = WebServer.getInstance();
-        server.setAssetManager(this.getAssets());
-        server.setHandler(webHandler);
-        server.setView(roseView);
         
         // Show the view
         setContentView(roseView);
@@ -247,23 +236,4 @@ public class RoseActivity extends Activity {
     	// Build the outgoing buffer
     	outputStringBuffer = new StringBuffer("");
     }
-    
-    /*** Web Methods ***/
-    
-    private final Handler webHandler = new Handler() {
-    	@Override
-    	public void handleMessage(Message msg) {
-    		switch (msg.what) {
-    			case MESSAGE_DECAY:
-    				decay();
-    				break;
-    			case MESSAGE_REVERT:
-    				revert();
-    				break;
-    			case MESSAGE_TOGGLE_DISPLAY:
-    				toggleDisplay();
-    				break;
-    		}
-    	}
-    };
 }
