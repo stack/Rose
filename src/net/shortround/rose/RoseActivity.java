@@ -81,7 +81,7 @@ public class RoseActivity extends Activity {
         batteryReceiver = new BroadcastReceiver() {
         	@Override
         	public void onReceive(Context context, Intent intent) {
-        		int rawLevel = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        		int rawLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         		int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         		
         		int level = -1;
