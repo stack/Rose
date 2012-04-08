@@ -210,7 +210,11 @@ public class RoseView extends View {
 		
 		// Set the proper offset and scale
 		canvas.translate(position[0], position[1]);
-		canvas.scale(scale, scale);
+		if (decay % 2 == 0) {
+			canvas.scale(scale, scale);
+		} else {
+			canvas.scale(scale * -1.0f, scale);
+		}
 								
 		// Draw the appropriate rose
 		Bitmap petal = getPetal();
