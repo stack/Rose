@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="petals">
+        <item>@drawable/petals01</item>
+		<item>@drawable/petals02</item>
+		<item>@drawable/petals03</item>
+		<item>@drawable/petals04</item>
+		<item>@drawable/petals05</item>
+		<item>@drawable/petals06</item>
+		<item>@drawable/petals07</item>
+		<item>@drawable/petals08</item>
+		<item>@drawable/petals09</item>
+		<item>@drawable/petals10</item>
+		<item>@drawable/petals11</item>
+		<item>@drawable/petals12</item>
+		<item>@drawable/petals13</item>
+		<item>@drawable/petals14</item>
+		<item>@drawable/petals15</item>
+    </array>
+    <array name="stems">
+        <item>@drawable/stems01</item>
+		<item>@drawable/stems02</item>
+		<item>@drawable/stems03</item>
+		<item>@drawable/stems04</item>
+		<item>@drawable/stems05</item>
+		<item>@drawable/stems06</item>
+		<item>@drawable/stems07</item>
+		<item>@drawable/stems08</item>
+		<item>@drawable/stems09</item>
+		<item>@drawable/stems10</item>
+		<item>@drawable/stems11</item>
+		<item>@drawable/stems12</item>
+		<item>@drawable/stems13</item>
+		<item>@drawable/stems14</item>
+		<item>@drawable/stems15</item>
+    </array>
+</resources>
