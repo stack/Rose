@@ -17,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
+import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -53,6 +54,10 @@ public class RoseView extends View {
 	private PathMeasure pathMeasure;
 	private float petalOffset;
 	
+	// Particle system
+	private ParticleSystem particleSystem;
+	private ParticleSystemThread particleSystemThread;
+	
 	public RoseView(Context context) {
 		super(context);
 		
@@ -62,6 +67,11 @@ public class RoseView extends View {
 		decay = 0;
 		display = true;
 		scale = 1.0f;
+		
+		// Build and fire off particle system
+		particleSystem = new ParticleSystem(calculateGenerationBox(), calculateMaxBox());
+		particleSystemThread = new ParticleSystemThread();
+		particleSystemThread.start();
 		
 		clearStaticAssets();
 		clearAnimationAssets();
@@ -82,6 +92,13 @@ public class RoseView extends View {
 		
 		// Set the decay
 		decay += 1;
+		
+		// Kill the particles if this is the last decay
+		if (decay == MAX_DECAY) {
+			stopParticleSystem();
+		}
+		
+		// Set up the animation
 		clearStaticAssets();
 		dropPetal();
 	}
@@ -99,7 +116,13 @@ public class RoseView extends View {
 		
 		// Just set the decay
 		decay -= 1;
+		
+		// Clean out any animation
 		clearStaticAssets();
+		
+		// Start the particle system if it's stopped
+		if (particleSystemThread == null) startParticleSystem();
+		
 		invalidate();
 	}
 	
@@ -111,6 +134,15 @@ public class RoseView extends View {
 		
 		// Toggle
 		display = display ? false : true;
+		
+		// Start or stop the thread if we need to
+		if (display) {
+			// Fire up a new particle thread
+			startParticleSystem();
+		} else {
+			stopParticleSystem();
+		}
+		
 		invalidate();
 	}
 	
@@ -284,6 +316,11 @@ public class RoseView extends View {
 				drawSinglePetal(canvas);
 			}
 			
+			// Draw the particles
+			for (Particle particle: particleSystem.getParticles()) {
+				particle.draw(canvas);
+			}
+			
 			// Draw the petal
 			drawPetal(canvas);
 		}
@@ -298,6 +335,18 @@ public class RoseView extends View {
 		float scaleY = (float) height / ROSE_HEIGHT;
 		
 		scale = scaleX > scaleY ? scaleY : scaleX;
+		
+		// Reset the particleSystem
+		if (particleSystem != null) {
+			// Kill the old thread
+			stopParticleSystem();
+		
+			// Set up the new size
+			particleSystem.changeBoxes(calculateGenerationBox(), calculateMaxBox());
+			
+			// Fire up the new thread
+			startParticleSystem();
+		}
 	}
 	
 	@Override
@@ -371,5 +420,79 @@ public class RoseView extends View {
 	public void setBattery(int value) {
 		battery = value;
 	}
-
+	
+	/*** Particle System ***/
+	
+	private RectF calculateGenerationBox() {
+		// Center point is 50% down, 50% over
+		float centerX = getWidth() * 0.50f;
+		float centerY = getHeight() * 0.50f;
+		
+		// Box is 40px wide and 20px height
+		RectF box = new RectF();
+		box.left = centerX - 20.0f;
+		box.right = centerX + 20.0f;
+		box.top = centerY - 10.0f;
+		box.bottom = centerY + 10.0f;
+		
+		return box;
+	}
+	
+	private RectF calculateMaxBox() {
+		RectF box = new RectF();
+		
+		// Box is as wide as the view
+		box.left = 0;
+		box.right= getWidth();
+		
+		// Box starts 20% from the bottom
+		box.top = getHeight() * 0.95f;
+		
+		// Box stops 5% from the bottom
+		box.bottom = getHeight() * 0.98f;
+		
+		return box;
+	}
+	
+	private void startParticleSystem() {
+		if (particleSystem != null) {
+			particleSystemThread = new ParticleSystemThread();
+			particleSystemThread.start();
+		}
+	}
+	private void stopParticleSystem() {
+		if (particleSystem != null) {
+			particleSystemThread.cancel();
+			particleSystemThread = null;
+		}
+	}
+	
+	private class ParticleSystemThread extends Thread {
+		
+		public void run() {
+			Log.d(TAG, "BEGIN particleSystemThread");
+			setName("ParticleSystemThread");
+			particleSystem.start();
+			
+			while (particleSystem.isRunning()) {
+				// Take the next step in the system
+				particleSystem.step();
+				postInvalidate();
+				
+				// Wait a little
+				try {
+					sleep(50);
+				} catch (InterruptedException e) {
+					
+				}
+			}
+			
+			particleSystem.stop();
+			Log.d(TAG, "END particleSystemThread");
+		}
+		
+		public void cancel() {
+			particleSystem.stop();
+		}
+	}
 }
