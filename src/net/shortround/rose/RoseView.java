@@ -70,8 +70,7 @@ public class RoseView extends View {
 		
 		// Build and fire off particle system
 		particleSystem = new ParticleSystem(calculateGenerationBox(), calculateMaxBox());
-		particleSystemThread = new ParticleSystemThread();
-		particleSystemThread.start();
+		startParticleSystem();
 		
 		clearStaticAssets();
 		clearAnimationAssets();
@@ -121,7 +120,7 @@ public class RoseView extends View {
 		clearStaticAssets();
 		
 		// Start the particle system if it's stopped
-		if (particleSystemThread == null) startParticleSystem();
+		startParticleSystem();
 		
 		invalidate();
 	}
@@ -454,27 +453,40 @@ public class RoseView extends View {
 		return box;
 	}
 	
-	private void startParticleSystem() {
-		if (particleSystem != null) {
-			particleSystemThread = new ParticleSystemThread();
-			particleSystemThread.start();
-		}
+	private synchronized void startParticleSystem() {
+		// Cancel if there is no particle system
+		if (particleSystem == null) return;
+		
+		// Shut down any existing particle system
+		if (particleSystemThread != null) { particleSystemThread.cancel(); particleSystemThread = null; }
+			
+		// Fire off a new particle system
+		particleSystemThread = new ParticleSystemThread();
+		particleSystemThread.start();
 	}
-	private void stopParticleSystem() {
-		if (particleSystem != null) {
-			particleSystemThread.cancel();
-			particleSystemThread = null;
-		}
+	
+	private synchronized void stopParticleSystem() {
+		// Cancel if there is no particle system
+		if (particleSystem == null) return;
+		
+		// Shut down the particle system
+		if (particleSystemThread != null) { particleSystemThread.cancel(); particleSystemThread = null; }
 	}
 	
 	private class ParticleSystemThread extends Thread {
+		
+		private boolean running;
+		
+		public ParticleSystemThread() {
+			running = true;
+		}
 		
 		public void run() {
 			Log.d(TAG, "BEGIN particleSystemThread");
 			setName("ParticleSystemThread");
 			particleSystem.start();
 			
-			while (particleSystem.isRunning()) {
+			while (running) {
 				// Take the next step in the system
 				particleSystem.step();
 				postInvalidate();
@@ -492,7 +504,7 @@ public class RoseView extends View {
 		}
 		
 		public void cancel() {
-			particleSystem.stop();
+			running = false;
 		}
 	}
 }

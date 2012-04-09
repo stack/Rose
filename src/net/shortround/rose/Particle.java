@@ -53,7 +53,7 @@ public class Particle {
 		
 		// Build the paint
 		paint = new Paint();
-		paint.setColor(Color.WHITE);
+		paint.setColor(Color.parseColor("#ff4540"));
 	}
 	
 	/*** Drawing ***/
@@ -112,7 +112,7 @@ public class Particle {
 		
 		if (value >= 0.50f) value = 1.0f - value;
 		
-		return (int) (value * 200.0f);
+		return (int) (value * 510.0f);
 	}
 	
 	private float[] calculateXandY() {

@@ -27,8 +27,6 @@ public class ParticleSystem {
 	
 	private Random generator;
 	
-	private boolean running;
-	
 	public ParticleSystem(RectF generationBox, RectF maxBox) {
 		// Build the list of particles
 		particles = new CopyOnWriteArrayList<Particle>();
@@ -44,18 +42,10 @@ public class ParticleSystem {
 	public void start() {
 		// Clear the particles and add new ones
 		particles.clear();
-		
-		// Mark that we are running
-		running = true;
 	}
 	
 	public void step() {
 		ArrayList<Particle> deceased = new ArrayList<Particle>();
-		
-		// Add a particle if we don't have enough
-		if (particles.size() < MAX_PARTICLES) {
-			particles.add(createParticle());
-		}
 		
 		// Age the particles
 		for (Particle particle : particles) {
@@ -75,20 +65,19 @@ public class ParticleSystem {
 			// Add a new particle
 			particles.add(createParticle());
 		}
+		
+		// Add a particle if we don't have enough
+		if (particles.size() < MAX_PARTICLES) {
+			particles.add(createParticle());
+		}
 	}
 	
 	public void stop() {
 		// Clear the particles
 		particles.clear();
-				
-		// Mark that we are not running
-		running = false;
 	}
 	
 	public void changeBoxes(RectF generationBox, RectF maxBox) {
-		// Don't change boxes if we are running
-		if (running) return;
-		
 		this.generationBox = generationBox;
 		this.maxBox = maxBox;
 	}
@@ -109,9 +98,5 @@ public class ParticleSystem {
 	
 	public CopyOnWriteArrayList<Particle> getParticles() {
 		return particles;
-	}
-	
-	public boolean isRunning() {
-		return running;
 	}
 }
