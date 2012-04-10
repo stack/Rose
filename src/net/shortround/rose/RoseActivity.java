@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -50,6 +51,10 @@ public class RoseActivity extends Activity {
     		break;
     	}
     }
+	
+	public void onBackPress() {
+		finish();
+	}
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,6 +94,15 @@ public class RoseActivity extends Activity {
         
         // Show the view
         setContentView(roseView);
+    }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
     
     @Override

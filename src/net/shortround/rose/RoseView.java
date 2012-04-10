@@ -135,7 +135,7 @@ public class RoseView extends View {
 		display = display ? false : true;
 		
 		// Start or stop the thread if we need to
-		if (display) {
+		if (display && decay != MAX_DECAY) {
 			// Fire up a new particle thread
 			startParticleSystem();
 		} else {
@@ -157,7 +157,7 @@ public class RoseView extends View {
 	private void dropPetal() {
 		// Build the animation
 		ValueAnimator animator = ValueAnimator.ofFloat(0.0f, 1.0f);
-		animator.setDuration(2000);
+		animator.setDuration(3000);
 		animator.setInterpolator(new AccelerateDecelerateInterpolator());
 				
 		animator.addListener(new AnimatorListener() {
