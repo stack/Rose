@@ -354,14 +354,6 @@ public class RoseView extends View {
 		setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
 		
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			// A touch in the top-left enabled discovery
-			if (event.getX() < 50.0f && event.getY() < 50.0f) {
-				// Become discoverable here
-				RoseActivity activity = (RoseActivity) getContext();
-				activity.ensureDiscoverable();
-				return true;
-			}
-			
 			// A touch has ended, split the screen and change the decay for the stem
 			if (event.getX() < getWidth() / 2.0f) {
 				revert();
