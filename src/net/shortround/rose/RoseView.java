@@ -7,6 +7,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -161,32 +162,27 @@ public class RoseView extends View {
 		animator.setInterpolator(new AccelerateDecelerateInterpolator());
 				
 		animator.addListener(new AnimatorListener() {
-			@Override
 			public void onAnimationCancel(Animator animator) {
 				animating = false;
 				clearAnimationAssets();
 				invalidate();
 			}
 
-			@Override
 			public void onAnimationEnd(Animator animation) {
 				animating = false;
 				clearAnimationAssets();
 				invalidate();
 			}
 
-			@Override
 			public void onAnimationRepeat(Animator animation) {
 			}
 
-			@Override
 			public void onAnimationStart(Animator animation) {
 				animating = true;
 			}
 		});
 				
 		animator.addUpdateListener(new AnimatorUpdateListener() {
-			@Override
 			public void onAnimationUpdate(ValueAnimator animation) {
 				petalOffset = animation.getAnimatedFraction();
 				invalidate();
@@ -295,6 +291,7 @@ public class RoseView extends View {
 		return cachedStem;
 	}
 	
+	@SuppressLint("DrawAllocation")
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -354,6 +351,13 @@ public class RoseView extends View {
 		setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
 		
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			// A touch in the top-left enabled discovery
+			if (event.getX() < 50.0f && event.getY() < 50.0f) {
+				// Become discoverable here
+				RoseActivity activity = (RoseActivity) getContext();
+				activity.ensureDiscoverable();
+				return true;
+			}
 			// A touch has ended, split the screen and change the decay for the stem
 			if (event.getX() < getWidth() / 2.0f) {
 				revert();

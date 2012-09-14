@@ -223,7 +223,7 @@ public class BluetoothService {
 			while (true) {
 				try {
 					// Read from the InputStream
-					bytes = inputStream.read(buffer);
+					bytes = socket.getInputStream().read(buffer);
 
 					handler.obtainMessage(RoseActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
 				} catch (IOException e) {
@@ -237,7 +237,7 @@ public class BluetoothService {
 		
 		public void write(byte[] buffer) {
 			try {
-				outputStream.write(buffer);
+				socket.getOutputStream().write(buffer);
 				
 				handler.obtainMessage(RoseActivity.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
 			} catch (IOException e) {
